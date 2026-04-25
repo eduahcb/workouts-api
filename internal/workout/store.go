@@ -11,6 +11,7 @@ type WorkoutStore interface {
 	Create(workout *Workout) (*Workout, error)
 	GetByID(id int64) (*Workout, error)
 	Update(workout *Workout) error
+	Delete(id int64) error
 }
 
 type PostgresWorkoutStore struct {
@@ -152,6 +153,28 @@ func (pg *PostgresWorkoutStore) Update(workout *Workout) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return tx.Commit(context.Background())
+}
+
+func (pg *PostgresWorkoutStore) Delete(id int64) error {
+	tx, err := pg.db.Begin(context.Background())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(context.Background())
+
+	result, err := tx.Exec(context.Background(), "DELETE FROM workouts WHERE id = $1", id)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected := result.RowsAffected()
+
+	if rowsAffected == 0 {
+		return pgx.ErrNoRows
 	}
 
 	return tx.Commit(context.Background())

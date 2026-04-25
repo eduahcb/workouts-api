@@ -10,9 +10,12 @@ func NewRouter(app *app.Application) *chi.Mux {
 
 	router.Get("/health", app.HealthCheck)
 
-	router.Post("/workouts", app.WorkoutHandler.Create)
-	router.Get("/workouts/{id}", app.WorkoutHandler.GetByID)
-	router.Put("/workouts/{id}", app.WorkoutHandler.Update)
+	router.Route("/workouts", func(r chi.Router) {
+		r.Post("/", app.WorkoutHandler.Create)
+		r.Get("/{id}", app.WorkoutHandler.GetByID)
+		r.Put("/{id}", app.WorkoutHandler.Update)
+		r.Delete("/{id}", app.WorkoutHandler.Delete)
+	})
 
 	return router
 }
