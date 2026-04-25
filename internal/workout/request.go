@@ -5,7 +5,7 @@ import (
 )
 
 type WorkoutRequest struct {
-	ID              int            `json:"id"`
+	ID              int64          `json:"id"`
 	Title           string         `json:"title" validate:"required"`
 	Description     string         `json:"description"`
 	DurationMinutes int            `json:"duration_minutes" validate:"required"`
@@ -13,6 +13,6 @@ type WorkoutRequest struct {
 	Entries         []WorkoutEntry `json:"entries"`
 }
 
-func (w *WorkoutRequest) Valitate() (utils.ValidateMessageError, error) {
+func (w *WorkoutRequest) Validate() (utils.ValidateMessageError, error) {
 	return utils.ValidateStruct(w)
 }

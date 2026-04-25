@@ -159,13 +159,7 @@ func (pg *PostgresWorkoutStore) Update(workout *Workout) error {
 }
 
 func (pg *PostgresWorkoutStore) Delete(id int64) error {
-	tx, err := pg.db.Begin(context.Background())
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(context.Background())
-
-	result, err := tx.Exec(context.Background(), "DELETE FROM workouts WHERE id = $1", id)
+	result, err := pg.db.Exec(context.Background(), "DELETE FROM workouts WHERE id = $1", id)
 
 	if err != nil {
 		return err
@@ -177,5 +171,5 @@ func (pg *PostgresWorkoutStore) Delete(id int64) error {
 		return pgx.ErrNoRows
 	}
 
-	return tx.Commit(context.Background())
+	return nil
 }

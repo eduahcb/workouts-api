@@ -58,6 +58,12 @@ func (wh *WorkoutHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	messages, err := workoutRequest.Validate()
+	if err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, utils.Envelope{"msg": messages})
+		return
+	}
+
 	workout.Title = workoutRequest.Title
 	workout.Description = workoutRequest.Description
 	workout.DurationMinutes = workoutRequest.DurationMinutes
@@ -76,7 +82,7 @@ func (wh *WorkoutHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (wh *WorkoutHandler) Update(w http.ResponseWriter, r *http.Request) {
-	var workoutRequet WorkoutRequest
+	var workoutRequest WorkoutRequest
 	var workout Workout
 
 	workoutId, err := utils.ReadIDParam(r)
@@ -87,23 +93,24 @@ func (wh *WorkoutHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&workoutRequet)
+	err = json.NewDecoder(r.Body).Decode(&workoutRequest)
 	if err != nil {
 		wh.logger.Printf("Error decoding workout: %v", err)
+		utils.WriteJSON(w, http.StatusBadRequest, utils.Envelope{"msg": "Invalid request body"})
 		return
 	}
 
-	messages, err := workoutRequet.Valitate()
+	messages, err := workoutRequest.Validate()
 	if err != nil {
 		utils.WriteJSON(w, http.StatusBadRequest, utils.Envelope{"msg": messages})
 		return
 	}
 
-	workout.Title = workoutRequet.Title
-	workout.Description = workoutRequet.Description
-	workout.DurationMinutes = workoutRequet.DurationMinutes
-	workout.CaloriesBurned = workoutRequet.CaloriesBurned
-	workout.Entries = workoutRequet.Entries
+	workout.Title = workoutRequest.Title
+	workout.Description = workoutRequest.Description
+	workout.DurationMinutes = workoutRequest.DurationMinutes
+	workout.CaloriesBurned = workoutRequest.CaloriesBurned
+	workout.Entries = workoutRequest.Entries
 	workout.ID = workoutId
 
 	err = wh.workoutStore.Update(&workout)
@@ -127,6 +134,7 @@ func (wh *WorkoutHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		wh.logger.Printf("Error reading workout ID: %v", err)
 		utils.WriteJSON(w, http.StatusBadRequest, utils.Envelope{"msg": err.Error()})
+		return
 	}
 
 	err = wh.workoutStore.Delete(paramId)
